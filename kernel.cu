@@ -103,9 +103,9 @@ int main() {
 
     /* Variables */
     // Changable variables
-    int NX = 100; // number of X
-    int NY = 100; // number of Y
-    int NT = 1000; // number of Times/Iterations
+    int NX = 20; // number of X
+    int NY = 20; // number of Y
+    int NT = 100; // number of Times/Iterations
     double dl = 1;
 
 
