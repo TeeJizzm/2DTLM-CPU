@@ -40,18 +40,19 @@ void stageScatter(double* V1, double* V2, double* V3, double* V4, int NX, int NY
     // for int i = 0; i < NX*NY; i++
     for (int x = 0; x < NX; x++) {
         for (int y = 0; y < NY; y++) {
-            I = (2 * V1[(x * NY) + y] + 2 * V4[(x * NY) + y] - 2 * V2[(x * NY) + y] - 2 * V3[(x * NY) + y]) / (4 * Z);
+            I = (V1[(x * NY) + y] + V4[(x * NY) + y] - V2[(x * NY) + y] - V3[(x * NY) + y]) / (2);
+            // Divided by 2 for unnecessary mathematics
 
-            V = 2 * V1[x * NY + y] - I * Z;         //port1
+            V = 2 * V1[x * NY + y] - I;         //port1
             V1[x * NY + y] = V - V1[x * NY + y];
 
-            V = 2 * V2[x * NY + y] + I * Z;         //port2
+            V = 2 * V2[x * NY + y] + I;         //port2
             V2[x * NY + y] = V - V2[x * NY + y];
 
-            V = 2 * V3[x * NY + y] + I * Z;         //port3
+            V = 2 * V3[x * NY + y] + I;         //port3
             V3[x * NY + y] = V - V3[x * NY + y];
 
-            V = 2 * V4[x * NY + y] - I * Z;         //port4
+            V = 2 * V4[x * NY + y] - I;         //port4
             V4[x * NY + y] = V - V4[x * NY + y];
         }
     }
@@ -103,15 +104,10 @@ int main() {
 
     /* Variables */
     // Changable variables
-    int NX = 20; // number of X
-    int NY = 20; // number of Y
-    int NT = 100; // number of Times/Iterations
+    int NX = 200; // number of X
+    int NY = 200; // number of Y
+    int NT = 1000; // number of Times/Iterations
     double dl = 1;
-
-
-
-    double dt = dl / (sqrt(2.) * c);
-
 
     // Retrieval from GPU
     //*/
@@ -122,7 +118,8 @@ int main() {
     //*/
 
 
-    // Scatter Coefficient
+    // Variables and coefficients
+    // Scatter coefficient
     double Z = eta0 / sqrt(2.);
 
     // Boundary connect Coefficiants
@@ -131,11 +128,14 @@ int main() {
     double rYmin = -1;
     double rYmax = -1;
 
-    // input parameters
+    // impulse parameters
+    double dt = dl / (sqrt(2.) * c);
     double width = 20 * dt * sqrt(2.);
     double delay = 100 * dt * sqrt(2.);
+
+    // input position
     int Ein[] = { 10,10 };
-    // output parameters
+    // output/reading position
     int Eout[] = { 15,15 };
 
     // file output
