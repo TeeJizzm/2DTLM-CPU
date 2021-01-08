@@ -15,14 +15,14 @@ using namespace std;
 
 int main() {
     std::clock_t start = std::clock();
-    int NX = 100;
-    int NY = 100;
-    int NT = 8192;
+    int NX = 900;
+    int NY = 900;
+    int NT = 1000;
     double dl = 1;
     double dt = dl / (sqrt(2.) * c);
 
     //2D mesh variables
-    double I = 0, tempV = 0, E0 = 0, V = 0;
+    double tempV = 0, E0 = 0, V = 0;
     double** V1 = declare_array2D(NX, NY);
     double** V2 = declare_array2D(NX, NY);
     double** V3 = declare_array2D(NX, NY);
@@ -42,7 +42,7 @@ int main() {
     int Ein[] = { 10,10 };
     int Eout[] = { 15,15 };
 
-    ofstream output("output.out");
+    ofstream output("CPU.csv");
 
     for (int n = 0; n < NT; n++) {
 
@@ -53,10 +53,13 @@ int main() {
         V3[Ein[0]][Ein[1]] = V3[Ein[0]][Ein[1]] - E0;
         V4[Ein[0]][Ein[1]] = V4[Ein[0]][Ein[1]] + E0;
 
-        //scatter
+        
+        //*/
+        // original scatter
         for (int x = 0; x < NX; x++) {
             for (int y = 0; y < NY; y++) {
-                I = (2 * V1[x][y] + 2 * V4[x][y] - 2 * V2[x][y] - 2 * V3[x][y]) / (4 * Z);
+
+                double I = (2 * V1[x][y] + 2 * V4[x][y] - 2 * V2[x][y] - 2 * V3[x][y]) / (4 * Z);
 
                 V = 2 * V1[x][y] - I * Z;         //port1
                 V1[x][y] = V - V1[x][y];
@@ -68,6 +71,27 @@ int main() {
                 V4[x][y] = V - V4[x][y];
             }
         }
+
+        /*/
+        // scatter without Z
+        for (int x = 0; x < NX; x++) {
+            for (int y = 0; y < NY; y++) {
+
+                double IZ = ((V1[x][y] + V4[x][y] - V2[x][y] - V3[x][y]) / 2);
+
+                V = 2 * V1[x][y] - IZ;         //port1
+                V1[x][y] = V - V1[x][y];
+                V = 2 * V2[x][y] + IZ;         //port2
+                V2[x][y] = V - V2[x][y];
+                V = 2 * V3[x][y] + IZ;         //port3
+                V3[x][y] = V - V3[x][y];
+                V = 2 * V4[x][y] - IZ;         //port4
+                V4[x][y] = V - V4[x][y];
+            }
+        }
+
+        //*/
+
 
         //connect
         for (int x = 1; x < NX; x++) {
@@ -96,7 +120,7 @@ int main() {
         }
 
 
-        output << n * dt << "  " << V2[Eout[0]][Eout[1]] + V4[Eout[0]][Eout[1]] << endl;
+        output << n * dt << "," << V2[Eout[0]][Eout[1]] + V4[Eout[0]][Eout[1]] << endl;
         if (n % 100 == 0)
             cout << n << endl;
 
